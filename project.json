@@ -1,5 +1,5 @@
 {
-  "name": "InboxMonitor",
+  "name": "GetEmail_Gmail",
   "description": "Blank Process",
   "main": "Main.xaml",
   "dependencies": {

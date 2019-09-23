@@ -1039,8 +1039,8 @@
   },
   "project": {
     "restore": {
-      "projectUniqueName": "InboxMonitor",
-      "projectName": "InboxMonitor",
+      "projectUniqueName": "GetEmail_Gmail",
+      "projectName": "GetEmail_Gmail",
       "projectPath": "C:\\Users\\Jeff Richey\\Documents\\UiPath\\InboxMonitor_Gmail\\.local",
       "packagesPath": "C:\\Users\\Jeff Richey\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\Jeff Richey\\Documents\\UiPath\\InboxMonitor_Gmail\\.local"
