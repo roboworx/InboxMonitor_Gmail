@@ -47,18 +47,23 @@
       <AssemblyReference>System.ValueTuple</AssemblyReference>
     </scg:List>
   </TextExpression.ReferencesForImplementation>
-  <Sequence sap2010:Annotation.AnnotationText="Get Gmail messages, mark them read, move them into folder.&#xA;&#xA;Pre Condition: &#xA;--IMAP must be enabled in the Gmail account settings&#xA;--2 Factor Authentication must be enabled for the Gmail Account&#xA;--App password must be created for UiPath in the Gmail Account AFTER 2 Factor Authentication has been enabled for the account." DisplayName="GetGmailMessages" sap:VirtualizedContainerService.HintSize="604.666666666667,1841.33333333333" sap2010:WorkflowViewState.IdRef="Sequence_2">
+  <Sequence sap2010:Annotation.AnnotationText="Get Gmail messages, mark them read, move them into folder.&#xA;&#xA;Pre Condition: &#xA;--IMAP must be enabled in the Gmail account settings&#xA;--2 Factor Authentication must be enabled for the Gmail Account&#xA;--App password must be created for UiPath in the Gmail Account AFTER 2 Factor Authentication has been enabled for the account." DisplayName="GetGmailMessages" sap:VirtualizedContainerService.HintSize="376,1566" sap2010:WorkflowViewState.IdRef="Sequence_2">
     <Sequence.Variables>
       <Variable x:TypeArguments="x:String" sap2010:Annotation.AnnotationText="Optional - If more than one account Inbox is added to the Outlook application.&#xA;&#xA;NOTE: Do not use unless there are multiple accounts." Default="coolermaintenance@gmail.com" Name="EmailAddress" />
-      <Variable x:TypeArguments="x:String" sap2010:Annotation.AnnotationText="The Outlook folder we are getting the messages from." Default="Inbox" Name="strMailSourceFolder" />
       <Variable x:TypeArguments="x:String" sap2010:Annotation.AnnotationText="The filter string used to find the messages we want to read and process." Default="Alert:FridgeTemp" Name="strSearchCriteria" />
       <Variable x:TypeArguments="x:String" sap2010:Annotation.AnnotationText="Folder messages are moved into at end of process." Default="Refrigeration Monitoring" Name="strMailMoveFolder" />
       <Variable x:TypeArguments="x:Int32" Default="993" Name="IMAPPortNumber" />
       <Variable x:TypeArguments="x:String" Default="imap.gmail.com" Name="IMAPServer" />
       <Variable x:TypeArguments="x:String" Default="hroeoncgfkcmcsyb" Name="EmailPassword" />
-      <Variable x:TypeArguments="scg:List(snm:MailMessage)" Name="MessageList" />
+      <Variable x:TypeArguments="scg:List(snm:MailMessage)" Name="in_MessagesToProcess" />
       <Variable x:TypeArguments="x:Int32" Name="NumberOfMessages" />
       <Variable x:TypeArguments="x:String" Default="---------------" Name="LogBreaker" />
+      <Variable x:TypeArguments="x:String" Name="out_messagebody" />
+      <Variable x:TypeArguments="scg:List(snm:MailMessage)" Name="out_ProcessedMessages" />
+      <Variable x:TypeArguments="x:Int32" Name="NumberOfIgnoredMessages" />
+      <Variable x:TypeArguments="scg:List(snm:MailMessage)" Name="out_ignored_messages" />
+      <Variable x:TypeArguments="x:Int32" Name="TotalNumberOfMessages" />
+      <Variable x:TypeArguments="x:Int32" Name="NumberOfProcessedMessages" />
     </Sequence.Variables>
     <sap:WorkflowViewStateService.ViewState>
       <scg:Dictionary x:TypeArguments="x:String, x:Object">
@@ -66,19 +71,19 @@
         <x:Boolean x:Key="IsAnnotationDocked">True</x:Boolean>
       </scg:Dictionary>
     </sap:WorkflowViewStateService.ViewState>
-    <ui:GetIMAPMailMessages TimeoutMS="{x:Null}" sap2010:Annotation.AnnotationText="Login to Gmail account and get messages that meet the filter criteria." DeleteMessages="False" DisplayName="Get IMAP Mail Messages" Email="[EmailAddress]" EnableSSL="True" sap:VirtualizedContainerService.HintSize="562.666666666667,84" sap2010:WorkflowViewState.IdRef="GetIMAPMailMessages_1" MailFolder="Inbox" MarkAsRead="False" Messages="[MessageList]" OnlyUnreadMessages="True" Password="[EmailPassword]" Port="[IMAPPortNumber]" SecureConnection="SslOnConnect" Server="[IMAPServer]" Top="30">
+    <ui:GetIMAPMailMessages TimeoutMS="{x:Null}" sap2010:Annotation.AnnotationText="Login to Gmail account and get messages that meet the filter criteria." DeleteMessages="False" DisplayName="Get IMAP Mail Messages" Email="[EmailAddress]" EnableSSL="True" sap:VirtualizedContainerService.HintSize="334,82" sap2010:WorkflowViewState.IdRef="GetIMAPMailMessages_1" MailFolder="Inbox" MarkAsRead="False" Messages="[in_MessagesToProcess]" OnlyUnreadMessages="True" Password="[EmailPassword]" Port="[IMAPPortNumber]" SecureConnection="SslOnConnect" Server="[IMAPServer]" Top="30">
       <sap:WorkflowViewStateService.ViewState>
         <scg:Dictionary x:TypeArguments="x:String, x:Object">
           <x:Boolean x:Key="IsAnnotationDocked">True</x:Boolean>
         </scg:Dictionary>
       </sap:WorkflowViewStateService.ViewState>
     </ui:GetIMAPMailMessages>
-    <Assign sap2010:Annotation.AnnotationText="Define variable = Count the number of messages as string." sap:VirtualizedContainerService.HintSize="562.666666666667,107.333333333333" sap2010:WorkflowViewState.IdRef="Assign_6">
+    <Assign sap2010:Annotation.AnnotationText="Define variable = Count the number of messages as string." sap:VirtualizedContainerService.HintSize="334,105.333333333333" sap2010:WorkflowViewState.IdRef="Assign_6">
       <Assign.To>
         <OutArgument x:TypeArguments="x:Int32">[NumberOfMessages]</OutArgument>
       </Assign.To>
       <Assign.Value>
-        <InArgument x:TypeArguments="x:Int32">[MessageList.Count]</InArgument>
+        <InArgument x:TypeArguments="x:Int32">[in_MessagesToProcess.Count]</InArgument>
       </Assign.Value>
       <sap:WorkflowViewStateService.ViewState>
         <scg:Dictionary x:TypeArguments="x:String, x:Object">
@@ -86,38 +91,35 @@
         </scg:Dictionary>
       </sap:WorkflowViewStateService.ViewState>
     </Assign>
-    <ui:LogMessage sap2010:Annotation.AnnotationText="Log number of messages found for workflow and performance audit." DisplayName="Log Message" sap:VirtualizedContainerService.HintSize="562.666666666667,114.666666666667" sap2010:WorkflowViewState.IdRef="LogMessage_1" Level="Info" Message="[LogBreaker + NumberOfMessages.ToString + &quot;Found&quot; + LogBreaker]">
+    <ui:LogMessage sap2010:Annotation.AnnotationText="Log number of messages found for workflow and performance audit." DisplayName="Log Message" sap:VirtualizedContainerService.HintSize="334,137.333333333333" sap2010:WorkflowViewState.IdRef="LogMessage_1" Level="Info" Message="[LogBreaker + Environment.NewLine +&#xD;&#xA;NumberOfMessages.ToString + &quot; Messages Found&quot; +  Environment.NewLine]">
       <sap:WorkflowViewStateService.ViewState>
         <scg:Dictionary x:TypeArguments="x:String, x:Object">
           <x:Boolean x:Key="IsAnnotationDocked">True</x:Boolean>
-          <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+          <x:Boolean x:Key="IsExpanded">True</x:Boolean>
           <x:Boolean x:Key="IsPinned">False</x:Boolean>
         </scg:Dictionary>
       </sap:WorkflowViewStateService.ViewState>
     </ui:LogMessage>
-    <ui:ForEach x:TypeArguments="snm:MailMessage" CurrentIndex="{x:Null}" sap2010:Annotation.AnnotationText="Loop through list of messages that meet the criteria." DisplayName="For Each" sap:VirtualizedContainerService.HintSize="562.666666666667,1194.66666666667" sap2010:WorkflowViewState.IdRef="ForEach`1_3" Values="[MessageList]">
+    <ui:ForEach x:TypeArguments="snm:MailMessage" CurrentIndex="{x:Null}" sap2010:Annotation.AnnotationText="Loop through list of messages that meet the criteria.  Processed messages are marked as read and moved to specified folder." DisplayName="For Each" sap:VirtualizedContainerService.HintSize="334,325.333333333333" sap2010:WorkflowViewState.IdRef="ForEach`1_3" Values="[in_MessagesToProcess]">
       <ui:ForEach.Body>
         <ActivityAction x:TypeArguments="snm:MailMessage">
           <ActivityAction.Argument>
             <DelegateInArgument x:TypeArguments="snm:MailMessage" Name="item" />
           </ActivityAction.Argument>
-          <Sequence sap2010:Annotation.AnnotationText="Assign variables which convert message elements to strings." DisplayName="Body" sap:VirtualizedContainerService.HintSize="526,1027.33333333333" sap2010:WorkflowViewState.IdRef="Sequence_3">
+          <Sequence sap2010:Annotation.AnnotationText="Assign variables which convert message elements to strings." DisplayName="Body" sap:VirtualizedContainerService.HintSize="200,128" sap2010:WorkflowViewState.IdRef="Sequence_3">
             <Sequence.Variables>
               <Variable x:TypeArguments="x:String" Name="messagesubject" />
               <Variable x:TypeArguments="x:String" Name="messagebody" />
               <Variable x:TypeArguments="x:String" Name="str_messagesubject" />
-              <Variable x:TypeArguments="x:String" Name="out_messagebody" />
-              <Variable x:TypeArguments="x:String" Default="mail" Name="mail" />
-              <Variable x:TypeArguments="snm:MailMessage" Name="Message" />
             </Sequence.Variables>
             <sap:WorkflowViewStateService.ViewState>
               <scg:Dictionary x:TypeArguments="x:String, x:Object">
-                <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+                <x:Boolean x:Key="IsExpanded">False</x:Boolean>
                 <x:Boolean x:Key="IsAnnotationDocked">True</x:Boolean>
                 <x:Boolean x:Key="IsPinned">False</x:Boolean>
               </scg:Dictionary>
             </sap:WorkflowViewStateService.ViewState>
-            <Assign sap:VirtualizedContainerService.HintSize="484,62" sap2010:WorkflowViewState.IdRef="Assign_2">
+            <Assign sap:VirtualizedContainerService.HintSize="262,61.3333333333333" sap2010:WorkflowViewState.IdRef="Assign_2">
               <Assign.To>
                 <OutArgument x:TypeArguments="x:String">[messagesubject]</OutArgument>
               </Assign.To>
@@ -125,15 +127,22 @@
                 <InArgument x:TypeArguments="x:String">[Item.Subject.ToString]</InArgument>
               </Assign.Value>
             </Assign>
-            <If Condition="[messagesubject = strSearchCriteria]" sap:VirtualizedContainerService.HintSize="484,804.666666666667" sap2010:WorkflowViewState.IdRef="If_1">
+            <If sap2010:Annotation.AnnotationText="Move messages if they match the condition, else add the message to a list of ignored messages." Condition="[messagesubject = strSearchCriteria]" sap:VirtualizedContainerService.HintSize="262,128" sap2010:WorkflowViewState.IdRef="If_1">
+              <sap:WorkflowViewStateService.ViewState>
+                <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                  <x:Boolean x:Key="IsAnnotationDocked">True</x:Boolean>
+                  <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+                  <x:Boolean x:Key="IsPinned">False</x:Boolean>
+                </scg:Dictionary>
+              </sap:WorkflowViewStateService.ViewState>
               <If.Then>
-                <Sequence sap:VirtualizedContainerService.HintSize="304,650.666666666667" sap2010:WorkflowViewState.IdRef="Sequence_4">
+                <Sequence sap:VirtualizedContainerService.HintSize="304,644" sap2010:WorkflowViewState.IdRef="Sequence_4">
                   <sap:WorkflowViewStateService.ViewState>
                     <scg:Dictionary x:TypeArguments="x:String, x:Object">
                       <x:Boolean x:Key="IsExpanded">True</x:Boolean>
                     </scg:Dictionary>
                   </sap:WorkflowViewStateService.ViewState>
-                  <Assign sap:VirtualizedContainerService.HintSize="262,62" sap2010:WorkflowViewState.IdRef="Assign_3">
+                  <Assign sap:VirtualizedContainerService.HintSize="262,61.3333333333333" sap2010:WorkflowViewState.IdRef="Assign_3">
                     <Assign.To>
                       <OutArgument x:TypeArguments="x:String">[messagebody]</OutArgument>
                     </Assign.To>
@@ -141,7 +150,7 @@
                       <InArgument x:TypeArguments="x:String">[Item.Headers("HTMLBody").ToString]</InArgument>
                     </Assign.Value>
                   </Assign>
-                  <Assign sap:VirtualizedContainerService.HintSize="262,62" sap2010:WorkflowViewState.IdRef="Assign_4">
+                  <Assign sap:VirtualizedContainerService.HintSize="262,61.3333333333333" sap2010:WorkflowViewState.IdRef="Assign_4">
                     <Assign.To>
                       <OutArgument x:TypeArguments="x:String">[out_messagebody]</OutArgument>
                     </Assign.To>
@@ -149,7 +158,7 @@
                       <InArgument x:TypeArguments="x:String">[Convert.ToString(system.Text.RegularExpressions.Regex.Replace(Item.Headers("HTMLBody"), “&lt;[^&gt;]+&gt;|&amp;nbsp|[\r\t\n]”, String.Empty))]</InArgument>
                     </Assign.Value>
                   </Assign>
-                  <Assign sap:VirtualizedContainerService.HintSize="262,62" sap2010:WorkflowViewState.IdRef="Assign_5">
+                  <Assign sap:VirtualizedContainerService.HintSize="262,61.3333333333333" sap2010:WorkflowViewState.IdRef="Assign_5">
                     <Assign.To>
                       <OutArgument x:TypeArguments="x:String">[str_messagesubject]</OutArgument>
                     </Assign.To>
@@ -157,7 +166,7 @@
                       <InArgument x:TypeArguments="x:String">[item.Subject.ToString]</InArgument>
                     </Assign.Value>
                   </Assign>
-                  <ui:MoveIMAPMailMessageToFolder sap2010:Annotation.AnnotationText="Move Message to specified folder." DisplayName="Move IMAP Mail Message" Email="[EmailAddress]" EnableSSL="True" FromFolder="Inbox" sap:VirtualizedContainerService.HintSize="262,98" sap2010:WorkflowViewState.IdRef="MoveIMAPMailMessageToFolder_1" MailFolder="[strMailMoveFolder]" MailMessage="[item]" Password="[EmailPassword]" Port="[IMAPPortNumber]" SecureConnection="Auto" Server="[IMAPServer]">
+                  <ui:MoveIMAPMailMessageToFolder sap2010:Annotation.AnnotationText="Move Message to specified folder." DisplayName="Move IMAP Mail Message" Email="[EmailAddress]" EnableSSL="True" FromFolder="Inbox" sap:VirtualizedContainerService.HintSize="262,96" sap2010:WorkflowViewState.IdRef="MoveIMAPMailMessageToFolder_1" MailFolder="[strMailMoveFolder]" MailMessage="[item]" Password="[EmailPassword]" Port="[IMAPPortNumber]" SecureConnection="Auto" Server="[IMAPServer]">
                     <sap:WorkflowViewStateService.ViewState>
                       <scg:Dictionary x:TypeArguments="x:String, x:Object">
                         <x:Boolean x:Key="IsAnnotationDocked">True</x:Boolean>
@@ -166,7 +175,7 @@
                       </scg:Dictionary>
                     </sap:WorkflowViewStateService.ViewState>
                   </ui:MoveIMAPMailMessageToFolder>
-                  <ui:LogMessage sap2010:Annotation.AnnotationText="Enter message details into log for further processing as needed." DisplayName="Log Message" sap:VirtualizedContainerService.HintSize="334,140" sap2010:WorkflowViewState.IdRef="LogMessage_2" Level="Info" Message="[LogBreaker + Environment.NewLine +&#xD;&#xA;&quot;Subject:&quot; + messagesubject + Environment.NewLine + &#xD;&#xA;&quot;Sender&quot; + item.from.ToString + Environment.NewLine +&#xD;&#xA;&quot;Body&quot; + out_messagebody + Environment.NewLine +&#xD;&#xA;LogBreaker]">
+                  <ui:LogMessage sap2010:Annotation.AnnotationText="Enter message details into log for further processing as needed." DisplayName="Log Message" sap:VirtualizedContainerService.HintSize="262,112" sap2010:WorkflowViewState.IdRef="LogMessage_2" Level="Info" Message="[LogBreaker + &quot; message processed &quot; + LogBreaker + Environment.NewLine +&#xD;&#xA;&quot;message start  --&gt;&quot; + Environment.NewLine +&#xD;&#xA;&quot;SUBJECT:  &quot; + messagesubject + Environment.NewLine + &#xD;&#xA;&quot;SENDER:  &quot; + item.from.ToString + Environment.NewLine +&#xD;&#xA;&quot;BODY:  &quot; + out_messagebody + Environment.NewLine +&#xD;&#xA;&quot;&lt;-- message end&quot; + Environment.NewLine]">
                     <sap:WorkflowViewStateService.ViewState>
                       <scg:Dictionary x:TypeArguments="x:String, x:Object">
                         <x:Boolean x:Key="IsAnnotationDocked">True</x:Boolean>
@@ -177,6 +186,23 @@
                   </ui:LogMessage>
                 </Sequence>
               </If.Then>
+              <If.Else>
+                <Sequence sap:VirtualizedContainerService.HintSize="304,153.333333333333" sap2010:WorkflowViewState.IdRef="Sequence_5">
+                  <sap:WorkflowViewStateService.ViewState>
+                    <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                      <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+                    </scg:Dictionary>
+                  </sap:WorkflowViewStateService.ViewState>
+                  <Assign sap:VirtualizedContainerService.HintSize="262,61.3333333333333" sap2010:WorkflowViewState.IdRef="Assign_8">
+                    <Assign.To>
+                      <OutArgument x:TypeArguments="x:Int32">[TotalNumberOfMessages]</OutArgument>
+                    </Assign.To>
+                    <Assign.Value>
+                      <InArgument x:TypeArguments="x:Int32">[in_MessagesToProcess.Count]</InArgument>
+                    </Assign.Value>
+                  </Assign>
+                </Sequence>
+              </If.Else>
             </If>
           </Sequence>
         </ActivityAction>
@@ -187,5 +213,47 @@
         </scg:Dictionary>
       </sap:WorkflowViewStateService.ViewState>
     </ui:ForEach>
+    <ui:GetIMAPMailMessages TimeoutMS="{x:Null}" sap2010:Annotation.AnnotationText="Moved messages are marked as read." DeleteMessages="False" DisplayName="Get IMAP Mail Messages" Email="[EmailAddress]" EnableSSL="True" sap:VirtualizedContainerService.HintSize="334,66" sap2010:WorkflowViewState.IdRef="GetIMAPMailMessages_2" MailFolder="[strMailMoveFolder]" MarkAsRead="True" Messages="[out_ProcessedMessages]" OnlyUnreadMessages="True" Password="[EmailPassword]" Port="[IMAPPortNumber]" SecureConnection="SslOnConnect" Server="[IMAPServer]" Top="30">
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <x:Boolean x:Key="IsAnnotationDocked">True</x:Boolean>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
+    </ui:GetIMAPMailMessages>
+    <Assign sap2010:Annotation.AnnotationText="Define variable = Count the number of processed messages." sap:VirtualizedContainerService.HintSize="334,105.333333333333" sap2010:WorkflowViewState.IdRef="Assign_9">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:Int32">[NumberOfProcessedMessages]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:Int32">[out_ProcessedMessages.Count]</InArgument>
+      </Assign.Value>
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <x:Boolean x:Key="IsAnnotationDocked">True</x:Boolean>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
+    </Assign>
+    <Assign sap2010:Annotation.AnnotationText="Define variable = Calculate the number of ignored messages. (Total - Processed)" sap:VirtualizedContainerService.HintSize="334,105.333333333333" sap2010:WorkflowViewState.IdRef="Assign_10">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:Int32">[NumberOfIgnoredMessages]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:Int32">[(TotalNumberOfMessages - NumberOfProcessedMessages)]</InArgument>
+      </Assign.Value>
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <x:Boolean x:Key="IsAnnotationDocked">True</x:Boolean>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
+    </Assign>
+    <ui:LogMessage sap2010:Annotation.AnnotationText="Log the number of processed messages and ignored messages." DisplayName="Log Message" sap:VirtualizedContainerService.HintSize="334,112" sap2010:WorkflowViewState.IdRef="LogMessage_3" Level="Info" Message="[LogBreaker + Environment.NewLine +&#xD;&#xA;&quot;***** Process Results *****&quot; + Environment.NewLine +&#xD;&#xA;out_ProcessedMessages.Count.ToString + &quot;  Alert Messages Processed&quot; +Environment.NewLine +&#xD;&#xA;NumberOfIgnoredMessages.ToString + &quot;  Ignored Messages&quot; + Environment.NewLine +&#xD;&#xA;TotalNumberOfMessages.ToString + &quot;  Total&quot; + Environment.NewLine +&#xD;&#xA;&quot;***** Results End *****&quot; + Environment.NewLine +&#xD;&#xA;LogBreaker]">
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <x:Boolean x:Key="IsAnnotationDocked">True</x:Boolean>
+          <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+          <x:Boolean x:Key="IsPinned">False</x:Boolean>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
+    </ui:LogMessage>
   </Sequence>
 </Activity>
