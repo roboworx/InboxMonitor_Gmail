@@ -1,6 +1,6 @@
-<Activity mc:Ignorable="sap sap2010" x:Class="MonitorInbox" mva:VisualBasic.Settings="{x:Null}" sap:VirtualizedContainerService.HintSize="474.666666666667,1305.33333333333" sap2010:WorkflowViewState.IdRef="MonitorInbox_1" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mva="clr-namespace:Microsoft.VisualBasic.Activities;assembly=System.Activities" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=mscorlib" xmlns:snm="clr-namespace:System.Net.Mail;assembly=System" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<Activity mc:Ignorable="sap sap2010" x:Class="MonitorInbox" mva:VisualBasic.Settings="{x:Null}" sap:VirtualizedContainerService.HintSize="366.666666666667,1112" sap2010:WorkflowViewState.IdRef="MonitorInbox_1" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mva="clr-namespace:Microsoft.VisualBasic.Activities;assembly=System.Activities" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=mscorlib" xmlns:snm="clr-namespace:System.Net.Mail;assembly=System" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <TextExpression.NamespacesForImplementation>
-    <scg:List x:TypeArguments="x:String" Capacity="21">
+    <scg:List x:TypeArguments="x:String" Capacity="22">
       <x:String>System.Activities</x:String>
       <x:String>System.Activities.Statements</x:String>
       <x:String>System.Activities.Expressions</x:String>
@@ -22,6 +22,7 @@
       <x:String>System.Windows.Markup</x:String>
       <x:String>UiPath.Core</x:String>
       <x:String>UiPath.Core.Activities</x:String>
+      <x:String>Microsoft.VisualBasic.CompilerServices</x:String>
     </scg:List>
   </TextExpression.NamespacesForImplementation>
   <TextExpression.ReferencesForImplementation>
@@ -46,7 +47,7 @@
       <AssemblyReference>System.ValueTuple</AssemblyReference>
     </scg:List>
   </TextExpression.ReferencesForImplementation>
-  <Sequence sap2010:Annotation.AnnotationText="Get Gmail messages, mark them read, move them into folder.&#xA;&#xA;Pre Condition: &#xA;--IMAP must be enabled in the Gmail account settings&#xA;--2 Factor Authentication must be enabled for the Gmail Account&#xA;--App password must be created for UiPath in the Gmail Account AFTER 2 Factor Authentication has been enabled for the account." DisplayName="GetGmailMessages" sap:VirtualizedContainerService.HintSize="454.666666666667,1205.33333333333" sap2010:WorkflowViewState.IdRef="Sequence_2">
+  <Sequence sap2010:Annotation.AnnotationText="Get Gmail messages, mark them read, move them into folder.&#xA;&#xA;Pre Condition: &#xA;--IMAP must be enabled in the Gmail account settings&#xA;--2 Factor Authentication must be enabled for the Gmail Account&#xA;--App password must be created for UiPath in the Gmail Account AFTER 2 Factor Authentication has been enabled for the account." DisplayName="GetGmailMessages" sap:VirtualizedContainerService.HintSize="346.666666666667,1012" sap2010:WorkflowViewState.IdRef="Sequence_2">
     <Sequence.Variables>
       <Variable x:TypeArguments="x:String" sap2010:Annotation.AnnotationText="Optional - If more than one account Inbox is added to the Outlook application.&#xA;&#xA;NOTE: Do not use unless there are multiple accounts." Default="coolermaintenance@gmail.com" Name="EmailAddress" />
       <Variable x:TypeArguments="x:String" sap2010:Annotation.AnnotationText="The Outlook folder we are getting the messages from." Default="Inbox" Name="strMailSourceFolder" />
@@ -56,6 +57,8 @@
       <Variable x:TypeArguments="x:String" Default="imap.gmail.com" Name="IMAPServer" />
       <Variable x:TypeArguments="x:String" Default="hroeoncgfkcmcsyb" Name="EmailPassword" />
       <Variable x:TypeArguments="scg:List(snm:MailMessage)" Name="MessageList" />
+      <Variable x:TypeArguments="x:Int32" Name="NumberOfMessages" />
+      <Variable x:TypeArguments="x:String" Default="---------------" Name="LogBreaker" />
     </Sequence.Variables>
     <sap:WorkflowViewStateService.ViewState>
       <scg:Dictionary x:TypeArguments="x:String, x:Object">
@@ -63,15 +66,42 @@
         <x:Boolean x:Key="IsAnnotationDocked">True</x:Boolean>
       </scg:Dictionary>
     </sap:WorkflowViewStateService.ViewState>
-    <ui:GetIMAPMailMessages TimeoutMS="{x:Null}" DeleteMessages="False" DisplayName="Get IMAP Mail Messages" Email="[EmailAddress]" EnableSSL="True" sap:VirtualizedContainerService.HintSize="412.666666666667,22" sap2010:WorkflowViewState.IdRef="GetIMAPMailMessages_1" MailFolder="Inbox" MarkAsRead="True" Messages="[MessageList]" OnlyUnreadMessages="True" Password="[EmailPassword]" Port="[IMAPPortNumber]" SecureConnection="SslOnConnect" Server="[IMAPServer]" Top="30" />
-    <ui:MessageBox Caption="{x:Null}" ChosenButton="{x:Null}" Buttons="Ok" DisplayName="Message Box" sap:VirtualizedContainerService.HintSize="412.666666666667,58.6666666666667" sap2010:WorkflowViewState.IdRef="MessageBox_1" Text="[MessageList.Count.ToString]" TopMost="True" />
-    <ui:ForEach x:TypeArguments="snm:MailMessage" CurrentIndex="{x:Null}" DisplayName="For Each" sap:VirtualizedContainerService.HintSize="412.666666666667,824" sap2010:WorkflowViewState.IdRef="ForEach`1_3" Values="[MessageList]">
+    <ui:GetIMAPMailMessages TimeoutMS="{x:Null}" sap2010:Annotation.AnnotationText="Login to Gmail account and get messages that meet the filter criteria." DeleteMessages="False" DisplayName="Get IMAP Mail Messages" Email="[EmailAddress]" EnableSSL="True" sap:VirtualizedContainerService.HintSize="304.666666666667,84" sap2010:WorkflowViewState.IdRef="GetIMAPMailMessages_1" MailFolder="Inbox" MarkAsRead="True" Messages="[MessageList]" OnlyUnreadMessages="True" Password="[EmailPassword]" Port="[IMAPPortNumber]" SecureConnection="SslOnConnect" Server="[IMAPServer]" Top="30">
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <x:Boolean x:Key="IsAnnotationDocked">True</x:Boolean>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
+    </ui:GetIMAPMailMessages>
+    <Assign sap2010:Annotation.AnnotationText="Define variable = Count the number of messages as string." sap:VirtualizedContainerService.HintSize="304.666666666667,107.333333333333" sap2010:WorkflowViewState.IdRef="Assign_6">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:Int32">[NumberOfMessages]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:Int32">[MessageList.Count]</InArgument>
+      </Assign.Value>
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <x:Boolean x:Key="IsAnnotationDocked">True</x:Boolean>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
+    </Assign>
+    <ui:LogMessage sap2010:Annotation.AnnotationText="Log number of messages found for workflow and performance audit." DisplayName="Log Message" sap:VirtualizedContainerService.HintSize="304.666666666667,114.666666666667" sap2010:WorkflowViewState.IdRef="LogMessage_1" Level="Info" Message="[LogBreaker + NumberOfMessages.ToString + &quot;Found&quot; + LogBreaker]">
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <x:Boolean x:Key="IsAnnotationDocked">True</x:Boolean>
+          <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+          <x:Boolean x:Key="IsPinned">False</x:Boolean>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
+    </ui:LogMessage>
+    <ui:ForEach x:TypeArguments="snm:MailMessage" CurrentIndex="{x:Null}" sap2010:Annotation.AnnotationText="Loop through list of messages that meet the criteria." DisplayName="For Each" sap:VirtualizedContainerService.HintSize="304.666666666667,315.333333333333" sap2010:WorkflowViewState.IdRef="ForEach`1_3" Values="[MessageList]">
       <ui:ForEach.Body>
         <ActivityAction x:TypeArguments="snm:MailMessage">
           <ActivityAction.Argument>
             <DelegateInArgument x:TypeArguments="snm:MailMessage" Name="item" />
           </ActivityAction.Argument>
-          <Sequence DisplayName="Body" sap:VirtualizedContainerService.HintSize="376,685.333333333333" sap2010:WorkflowViewState.IdRef="Sequence_3">
+          <Sequence sap2010:Annotation.AnnotationText="Assign variables which convert message elements to strings." DisplayName="Body" sap:VirtualizedContainerService.HintSize="200,131.333333333333" sap2010:WorkflowViewState.IdRef="Sequence_3">
             <Sequence.Variables>
               <Variable x:TypeArguments="x:String" Name="messagesubject" />
               <Variable x:TypeArguments="x:String" Name="messagebody" />
@@ -82,10 +112,12 @@
             </Sequence.Variables>
             <sap:WorkflowViewStateService.ViewState>
               <scg:Dictionary x:TypeArguments="x:String, x:Object">
-                <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+                <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+                <x:Boolean x:Key="IsAnnotationDocked">True</x:Boolean>
+                <x:Boolean x:Key="IsPinned">False</x:Boolean>
               </scg:Dictionary>
             </sap:WorkflowViewStateService.ViewState>
-            <Assign sap:VirtualizedContainerService.HintSize="334,62" sap2010:WorkflowViewState.IdRef="Assign_2">
+            <Assign sap:VirtualizedContainerService.HintSize="262,62" sap2010:WorkflowViewState.IdRef="Assign_2">
               <Assign.To>
                 <OutArgument x:TypeArguments="x:String">[messagesubject]</OutArgument>
               </Assign.To>
@@ -93,7 +125,7 @@
                 <InArgument x:TypeArguments="x:String">[Item.Subject.ToString]</InArgument>
               </Assign.Value>
             </Assign>
-            <Assign sap:VirtualizedContainerService.HintSize="334,62" sap2010:WorkflowViewState.IdRef="Assign_3">
+            <Assign sap:VirtualizedContainerService.HintSize="262,62" sap2010:WorkflowViewState.IdRef="Assign_3">
               <Assign.To>
                 <OutArgument x:TypeArguments="x:String">[messagebody]</OutArgument>
               </Assign.To>
@@ -101,7 +133,7 @@
                 <InArgument x:TypeArguments="x:String">[Item.Headers("HTMLBody").ToString]</InArgument>
               </Assign.Value>
             </Assign>
-            <Assign sap:VirtualizedContainerService.HintSize="334,62" sap2010:WorkflowViewState.IdRef="Assign_5">
+            <Assign sap:VirtualizedContainerService.HintSize="262,62" sap2010:WorkflowViewState.IdRef="Assign_5">
               <Assign.To>
                 <OutArgument x:TypeArguments="x:String">[out_messagebody]</OutArgument>
               </Assign.To>
@@ -109,7 +141,7 @@
                 <InArgument x:TypeArguments="x:String">[Convert.ToString(system.Text.RegularExpressions.Regex.Replace(Item.Headers("HTMLBody"), “&lt;[^&gt;]+&gt;|&amp;nbsp|[\r\t\n]”, String.Empty))]</InArgument>
               </Assign.Value>
             </Assign>
-            <Assign sap:VirtualizedContainerService.HintSize="334,62" sap2010:WorkflowViewState.IdRef="Assign_4">
+            <Assign sap:VirtualizedContainerService.HintSize="262,62" sap2010:WorkflowViewState.IdRef="Assign_4">
               <Assign.To>
                 <OutArgument x:TypeArguments="x:String">[out_messagebody]</OutArgument>
               </Assign.To>
@@ -117,11 +149,32 @@
                 <InArgument x:TypeArguments="x:String">[Convert.ToString(system.Text.RegularExpressions.Regex.Replace(Item.Headers("HTMLBody"), “&lt;[^&gt;]+&gt;|&amp;nbsp|[\r\t\n]”, String.Empty))]</InArgument>
               </Assign.Value>
             </Assign>
-            <ui:MessageBox Caption="{x:Null}" ChosenButton="{x:Null}" Buttons="Ok" DisplayName="Message Box" sap:VirtualizedContainerService.HintSize="334,58.6666666666667" sap2010:WorkflowViewState.IdRef="MessageBox_2" Text="[out_messagebody]" TopMost="True" />
-            <ui:MoveIMAPMailMessageToFolder DisplayName="Move IMAP Mail Message" Email="[EmailAddress]" EnableSSL="True" FromFolder="Inbox" sap:VirtualizedContainerService.HintSize="334,86.6666666666667" sap2010:WorkflowViewState.IdRef="MoveIMAPMailMessageToFolder_1" MailFolder="[strMailMoveFolder]" MailMessage="[item]" Password="[EmailPassword]" Port="[IMAPPortNumber]" SecureConnection="Auto" Server="[IMAPServer]" />
+            <ui:MoveIMAPMailMessageToFolder sap2010:Annotation.AnnotationText="Move Message to specified folder." DisplayName="Move IMAP Mail Message" Email="[EmailAddress]" EnableSSL="True" FromFolder="Inbox" sap:VirtualizedContainerService.HintSize="262,98" sap2010:WorkflowViewState.IdRef="MoveIMAPMailMessageToFolder_1" MailFolder="[strMailMoveFolder]" MailMessage="[item]" Password="[EmailPassword]" Port="[IMAPPortNumber]" SecureConnection="Auto" Server="[IMAPServer]">
+              <sap:WorkflowViewStateService.ViewState>
+                <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                  <x:Boolean x:Key="IsAnnotationDocked">True</x:Boolean>
+                  <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+                  <x:Boolean x:Key="IsPinned">False</x:Boolean>
+                </scg:Dictionary>
+              </sap:WorkflowViewStateService.ViewState>
+            </ui:MoveIMAPMailMessageToFolder>
+            <ui:LogMessage sap2010:Annotation.AnnotationText="Enter message details into log for further processing as needed." DisplayName="Log Message" sap:VirtualizedContainerService.HintSize="262,114.666666666667" sap2010:WorkflowViewState.IdRef="LogMessage_2" Level="Info" Message="[LogBreaker + Environment.NewLine +&#xD;&#xA;&quot;Subject:&quot; + messagesubject + Environment.NewLine + &#xD;&#xA;&quot;Sender&quot; + item.Sender.ToString + Environment.NewLine +&#xD;&#xA;&quot;Body&quot; + out_messagebody + Environment.NewLine +&#xD;&#xA;LogBreaker]">
+              <sap:WorkflowViewStateService.ViewState>
+                <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                  <x:Boolean x:Key="IsAnnotationDocked">True</x:Boolean>
+                  <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+                  <x:Boolean x:Key="IsPinned">False</x:Boolean>
+                </scg:Dictionary>
+              </sap:WorkflowViewStateService.ViewState>
+            </ui:LogMessage>
           </Sequence>
         </ActivityAction>
       </ui:ForEach.Body>
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <x:Boolean x:Key="IsAnnotationDocked">True</x:Boolean>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
     </ui:ForEach>
   </Sequence>
 </Activity>
