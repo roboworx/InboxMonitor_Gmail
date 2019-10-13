@@ -113,3 +113,17 @@ Alert:FridgeTemp,"An alert message test
 ",10/07/2019 12:50:30,Outlook
 Alert:FridgeTemp,"adaadfadf
 ",10/07/2019 12:50:31,Outlook
+Alert:FridgeTemp,An alert message.This is a sample message sent from a hard workin bot over at Roboworx. Attached is a csv file containing Alert messages; processed by the bot over the past few days.,10/12/2019 19:57:42,Gmail
+Alert:FridgeTemp,"An alert message. ",10/12/2019 19:57:42,Gmail
+Alert:FridgeTemp,"An alert message. ",10/12/2019 19:57:42,Gmail
+Alert:FridgeTemp,"An alert message. ",10/12/2019 19:57:42,Gmail
+Alert:FridgeTemp,"            body { margin:10px; }    p { font-family: Helvetica Neue, Helvetica, Tahoma, Arial, sans-serif; font-size: 10pt; }    div { font-family: Helvetica Neue, Helvetica, Tahoma, Arial, sans-serif; font-size: 10pt; }    Refrigerator_Walk_In located at Norma&#039;s Noodles, Store Number 27 reported temperature in excess of 41 degrees.Kitchen 1 - 27 last temperature reading = 47.",10/12/2019 19:57:42,Gmail
+Alert:FridgeTemp,"            body { margin:10px; }    p { font-family: Helvetica Neue, Helvetica, Tahoma, Arial, sans-serif; font-size: 10pt; }    div { font-family: Helvetica Neue, Helvetica, Tahoma, Arial, sans-serif; font-size: 10pt; }    Refrigerator_Walk_In located at Norma&#039;s Noodles, Store Number 27 reported temperature in excess of 41 degrees.empty last temperature reading = 50.",10/12/2019 19:57:42,Gmail
+Alert:FridgeTemp,An alert warning from the refrigeration monitoring service.,10/12/2019 19:57:42,Gmail
+Alert:FridgeTemp,Some warning message body would be here.;Temperature:57,10/12/2019 19:57:42,Gmail
+Alert:FridgeTemp,An Alert Message,10/12/2019 19:57:42,Gmail
+Alert:FridgeTemp,;,10/12/2019 19:57:42,Gmail
+Alert:FridgeTemp,;,10/12/2019 19:57:42,Gmail
+Alert:FridgeTemp,An alert message,10/12/2019 19:57:42,Gmail
+Alert:FridgeTemp,An alert message,10/12/2019 19:57:42,Gmail
+Alert:FridgeTemp,Some warning messages will be configured here.,10/12/2019 19:57:42,Gmail
